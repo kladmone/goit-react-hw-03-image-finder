@@ -59,19 +59,16 @@ export class App extends Component {
 
   render() {
     const { images, status, isLoadMore } = this.state;
-    const showImages =
-      status === STATUSES.success && Array.isArray(images.hits);
+    const showImages = status === STATUSES.success && Array.isArray(images);
 
     return (
       <div>
         <Searchbar onSubmit={this.handleSubmit} />
-        {showImages && <ImageGallery images={this.state.images.hits} />}
+        {showImages && <ImageGallery images={this.state.images} />}
         {this.state.isOpenModal && (
-          <Modal LargeImage={this.state.images.hits.largeImageURL} />
+          <Modal LargeImage={this.state.images.largeImageURL} />
         )}
-        {showImages && isLoadMore && (
-          <Button handleLoadMore={this.handleLoadMore} />
-        )}
+        {isLoadMore && <Button handleLoadMore={this.handleLoadMore} />}
       </div>
     );
   }
