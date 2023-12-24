@@ -7,4 +7,4 @@ const Button = ({ handleLoadMore }) => {
   );
 };
 
-export default Button;
+export { Button };

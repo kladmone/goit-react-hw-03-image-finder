@@ -5,7 +5,7 @@ import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { STATUSES } from './Services/statuses';
 import { Modal } from './Modal/Modal';
-import Button from './Button/Button';
+import { Button } from './Button/Button';
 
 export class App extends Component {
   state = {
@@ -25,7 +25,7 @@ export class App extends Component {
 
     const inputValue = event.currentTarget.elements.searchInput.value;
 
-    this.setState({ query: inputValue, isLoadMore: false });
+    this.setState({ query: inputValue });
   };
 
   fetchImagesByQuery = async (query, page) => {
@@ -49,10 +49,12 @@ export class App extends Component {
           return;
         }
         this.setState(prevState => ({
-          images: [...prevState.images, ...images.hits],
+          images: [...prevState.images.hits, ...images.hits],
           isloadMore: this.state.page < Math.ceil(images.totalHits / 12),
         }));
-      } catch (error) {}
+      } catch (error) {
+        this.setState({ error: error.message });
+      }
     }
   }
   handleLoadMore = () => {
@@ -73,7 +75,9 @@ export class App extends Component {
         {this.state.isOpenModal && (
           <Modal LargeImage={this.state.images.hits.largeImageURL} />
         )}
-        {isLoadMore && <Button handleLoadMore={this.handleLoadMore} />}
+        {showImages && isLoadMore && (
+          <Button handleLoadMore={this.handleLoadMore} />
+        )}
       </div>
     );
   }
