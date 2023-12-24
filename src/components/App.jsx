@@ -28,22 +28,15 @@ export class App extends Component {
     this.setState({ query: inputValue });
   };
 
-  fetchImagesByQuery = async (query, page) => {
-    try {
-      this.setState({ status: STATUSES.pending });
-      const images = await requestImagesByQuery(query, page);
-      console.log(images);
-      this.setState({ images, status: STATUSES.success });
-    } catch (error) {
-      this.setState({ error: error.message, status: STATUSES.error });
-    }
-  };
-
-  componentDidUpdate(_, prevState) {
-    const { query, page, images } = this.state;
+  async componentDidUpdate(_, prevState) {
+    const { query, page } = this.state;
     if (page !== prevState.page || prevState.query !== query) {
       try {
-        this.fetchImagesByQuery(query, page);
+        this.setState({ status: STATUSES.pending });
+        const images = await requestImagesByQuery(query, page);
+
+        this.setState({ images, status: STATUSES.success });
+
         if (images.length === 0) {
           this.setState({ isEmpty: true });
           return;
@@ -53,10 +46,11 @@ export class App extends Component {
           isloadMore: this.state.page < Math.ceil(images.totalHits / 12),
         }));
       } catch (error) {
-        this.setState({ error: error.message });
+        this.setState({ error: error.message, status: STATUSES.error });
       }
     }
   }
+
   handleLoadMore = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
