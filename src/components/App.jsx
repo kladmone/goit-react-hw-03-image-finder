@@ -4,7 +4,7 @@ import { requestImagesByQuery } from './Services/api';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { STATUSES } from './Services/statuses';
-import { ModalComponent } from './Modal/ModalComponent';
+import { Modal } from './Modal/Modal';
 import { Button } from './Button/Button';
 
 export class App extends Component {
@@ -20,40 +20,37 @@ export class App extends Component {
     isEmpty: false,
   };
 
-  handleSubmit = event => {
-    event.preventDefault();
-
-    const inputValue = event.currentTarget.elements.searchInput.value;
-
-    this.setState({ query: inputValue });
-  };
-
   fetchImagesByQuery = async (query, page) => {
     try {
       const images = await requestImagesByQuery(query, page);
-      const imagesArray = images.hits;
-      return imagesArray;
+      return images;
     } catch (error) {
       this.setState({ error: error.message });
     }
   };
 
   async componentDidUpdate(_, prevState) {
-    const { page, query, images } = this.state;
+    const { page, query } = this.state;
     if (page !== prevState.page || prevState.query !== query) {
       try {
         this.setState({ status: STATUSES.pending });
-        const imagesArray = await this.fetchImagesByQuery(query, page);
-        this.setState({ images: imagesArray, status: STATUSES.success });
+        const { hits, totalHits } = await this.fetchImagesByQuery(query, page);
+        this.setState(prevState => ({
+          images: [...prevState.images, ...hits],
+          isLoadMore: this.state.page < Math.ceil(totalHits / 12),
+          status: STATUSES.success,
+        }));
       } catch (error) {
         this.setState({ error: error.message, status: STATUSES.error });
       }
-      this.setState(prevState => ({
-        images: [...prevState.images, ...images],
-        isLoadMore: this.state.page < Math.ceil(),
-      }));
     }
   }
+
+  handleSubmit = event => {
+    event.preventDefault();
+    const inputValue = event.currentTarget.elements.searchInput.value;
+    this.setState({ query: inputValue, images: [], page: 1 });
+  };
 
   handleLoadMore = () => {
     this.setState(prevState => ({
@@ -61,10 +58,9 @@ export class App extends Component {
     }));
   };
 
-  handleOpenModal = url => {
+  handleOpenModal = (largeImageURl, tags) => {
     this.setState({
-      isOpenModal: true,
-      modalData: { url },
+      modalData: { largeImageURl, tags },
     });
   };
 
@@ -77,8 +73,8 @@ export class App extends Component {
 
   render() {
     const showImages =
-      this.state.status === STATUSES.success &&
-      Array.isArray(this.state.images);
+      this.state.status === STATUSES.success && this.state.images.length > 0;
+    const { isLoadMore } = this.state;
     return (
       <div className={css.App}>
         <Searchbar onSubmit={this.handleSubmit} />
@@ -88,13 +84,14 @@ export class App extends Component {
             onImageClick={this.handleOpenModal}
           />
         )}
+
         {this.state.isOpenModal && (
-          <ModalComponent
+          <Modal
             handleCloseModal={this.handleCloseModal}
             modalData={this.state.modalData}
           />
         )}
-        <Button handleLoadMore={this.handleLoadMore} />
+        {isLoadMore && <Button handleLoadMore={this.handleLoadMore} />}
       </div>
     );
   }
