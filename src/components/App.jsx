@@ -6,6 +6,7 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { STATUSES } from './Services/statuses';
 import { Modal } from './Modal/Modal';
 import { Button } from './Button/Button';
+import { Loader } from './Loader/Loader';
 
 export class App extends Component {
   state = {
@@ -15,7 +16,7 @@ export class App extends Component {
     error: null,
     isLoadMore: false,
     isOpenModal: false,
-    modalData: null,
+    modalData: [],
     page: 1,
     isEmpty: false,
   };
@@ -61,36 +62,34 @@ export class App extends Component {
   handleOpenModal = (largeImageURl, tags) => {
     this.setState({
       modalData: { largeImageURl, tags },
+      isOpenModal: true,
     });
   };
 
   handleCloseModal = () => {
     this.setState({
       isOpenModal: false,
-      modalData: null,
     });
   };
 
   render() {
-    const showImages =
-      this.state.status === STATUSES.success && this.state.images.length > 0;
-    const { isLoadMore } = this.state;
+    const { isLoadMore, isOpenModal, status } = this.state;
     return (
       <div className={css.App}>
         <Searchbar onSubmit={this.handleSubmit} />
-        {showImages && (
-          <ImageGallery
-            images={this.state.images}
-            onImageClick={this.handleOpenModal}
-          />
-        )}
-
-        {this.state.isOpenModal && (
+        <ImageGallery
+          images={this.state.images}
+          onImageClick={this.handleOpenModal}
+        />
+        {status === STATUSES.pending && <Loader />}
+        {isOpenModal && (
           <Modal
-            handleCloseModal={this.handleCloseModal}
+            isOpenModal={isOpenModal}
+            onCloseModal={this.handleCloseModal}
             modalData={this.state.modalData}
           />
         )}
+
         {isLoadMore && <Button handleLoadMore={this.handleLoadMore} />}
       </div>
     );

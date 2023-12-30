@@ -1,5 +1,5 @@
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
-import css from '../Services/styles.module.css';
+import css from './ImageGallery.module.css';
 
 const ImageGallery = ({ images, onImageClick }) => {
   return (
