@@ -1,9 +1,9 @@
 import { Component } from 'react';
-import css from './Services/styles.module.css';
+import css from '../Styles/styles.module.css';
 import { requestImagesByQuery } from './Services/api';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
-import { STATUSES } from './Services/statuses';
+import { STATUSES } from '../Helpers/statuses';
 import { Modal } from './Modal/Modal';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
@@ -21,21 +21,12 @@ export class App extends Component {
     isEmpty: false,
   };
 
-  fetchImagesByQuery = async (query, page) => {
-    try {
-      const images = await requestImagesByQuery(query, page);
-      return images;
-    } catch (error) {
-      this.setState({ error: error.message });
-    }
-  };
-
   async componentDidUpdate(_, prevState) {
     const { page, query } = this.state;
     if (page !== prevState.page || prevState.query !== query) {
       try {
         this.setState({ status: STATUSES.pending });
-        const { hits, totalHits } = await this.fetchImagesByQuery(query, page);
+        const { hits, totalHits } = await requestImagesByQuery(query, page);
         this.setState(prevState => ({
           images: [...prevState.images, ...hits],
           isLoadMore: this.state.page < Math.ceil(totalHits / 12),
@@ -47,10 +38,11 @@ export class App extends Component {
     }
   }
 
-  handleSubmit = event => {
-    event.preventDefault();
-    const inputValue = event.currentTarget.elements.searchInput.value;
-    this.setState({ query: inputValue, images: [], page: 1 });
+  handleSubmit = query => {
+    if (this.state.query === query) {
+      return;
+    }
+    this.setState({ query: query, images: [], page: 1 });
   };
 
   handleLoadMore = () => {

@@ -1,4 +1,4 @@
-import css from '../Services/styles.module.css';
+import css from './ImageGalleryItem.module.css';
 const ImageGalleryItem = ({ image, onImageClick }) => {
   const { id, tags, webformatURL, largeImageURL } = image;
   return (

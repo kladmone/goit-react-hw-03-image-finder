@@ -1,11 +1,22 @@
-import Icon from 'components/Services/Icon';
+import Icon from 'Images/Icon';
 import css from './Searchbar.module.css';
+import { useState } from 'react';
 
 const Searchbar = ({ onSubmit }) => {
+  const [query, setQuery] = useState('');
+
+  const handleSubmit = event => {
+    event.preventDefault();
+    onSubmit(query);
+  };
+
+  const handleChange = event => {
+    setQuery(event.target.value);
+  };
   return (
     <div>
       <header className={css.Searchbar}>
-        <form className={css.SearchForm} onSubmit={onSubmit}>
+        <form className={css.SearchForm} onSubmit={handleSubmit}>
           <button type="submit" className={css.SearchFormButton}>
             <Icon className={css.searchIcon} />
             <span className={css.SearchFormButtonLabel}>Search</span>
@@ -18,6 +29,7 @@ const Searchbar = ({ onSubmit }) => {
             autoFocus
             placeholder="Search images and photos"
             required
+            onChange={handleChange}
           />
         </form>
       </header>
